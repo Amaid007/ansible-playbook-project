@@ -1,23 +1,14 @@
 ---
-- name: Deploy Docker
-  hosts: all
-  become: yes
-
+- name: Deploy Apache Docker Container
+  hosts: local
   tasks:
-    - name: Install Docker
-      apt:
-        name: docker.io
-        state: present
-        update_cache: yes
-
-    - name: Start Docker service
-      service:
-        name: docker
+    - name: Deploy Apache Docker container
+      docker_container:
+        name: apache_container
+        image: httpd:latest
         state: started
-        enabled: yes
-
-  handlers:
-    - name: Restart Docker
-      service:
-        name: docker
-        state: restarted
+        ports:
+          - "80:80"
+    - name: Configure Networking for Apache Container
+      command: ip addr add 172.168.10.2/30 dev eth0
+      when: ansible_hostname == "localhost"
